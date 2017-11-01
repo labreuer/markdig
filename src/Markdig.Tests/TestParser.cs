@@ -19,6 +19,15 @@ namespace Markdig.Tests
             TestSpec(markdownText, "<p><em>Unlimited-Fun®</em>®</p>");
         }
 
+        [Test]
+        public void TestAutoIdentifiersWithImage()
+        {
+            var input = @"![scenario image][scenario]
+## Scenario
+[scenario]: ./scenario.png";
+            TestSpec(input, "<p><img src=\"./scenario.png\" alt=\"scenario image\" /></p>\n<h2 id=\"scenario\">Scenario</h2>", "advanced");
+        }
+
         public static void TestSpec(string inputText, string expectedOutputText, string extensions = null)
         {
             foreach (var pipeline in GetPipeline(extensions))

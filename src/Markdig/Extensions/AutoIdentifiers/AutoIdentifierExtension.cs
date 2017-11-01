@@ -89,7 +89,8 @@ namespace Markdig.Extensions.AutoIdentifiers
                     Heading = headingBlock,
                     CreateLinkInline = CreateLinkInlineForHeading
                 };
-                processor.Document.SetLinkReferenceDefinition(text, linkRef);
+                // Use a prefix label to avoid clashing with an existing link reference definition
+                processor.Document.SetLinkReferenceDefinition("#'heading' " + text, linkRef);
             }
 
             // Then we register after inline have been processed to actually generate the proper #id
