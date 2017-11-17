@@ -89,7 +89,7 @@ namespace Markdig.Syntax
         /// <param name="text">The text.</param>
         /// <param name="block">The block.</param>
         /// <returns><c>true</c> if parsing is successful; <c>false</c> otherwise</returns>
-        public static bool TryParse<T>(ref T text, out LinkReferenceDefinition block) where T : ICharIterator
+        public static bool TryParse(ref StringLineGroup.Iterator text, out LinkReferenceDefinition block)
         {
             block = null;
             string label;
@@ -99,19 +99,23 @@ namespace Markdig.Syntax
             SourceSpan urlSpan;
             SourceSpan titleSpan;
 
-            var startSpan = text.Start;
+            var start = text.Start + text.StartPosition + text.StartColumn;
 
             if (!LinkHelper.TryParseLinkReferenceDefinition(ref text, out label, out url, out title, out labelSpan, out urlSpan, out titleSpan))
             {
                 return false;
             }
 
+            var length = titleSpan.End > 0 ? titleSpan.End : urlSpan.End;
+
             block = new LinkReferenceDefinition(label, url, title)
             {
-                LabelSpan = labelSpan,
-                UrlSpan = urlSpan,
-                TitleSpan = titleSpan,
-                Span = new SourceSpan(startSpan, titleSpan.End > 0 ? titleSpan.End: urlSpan.End)
+                Line = text.StartLine,
+                Column = text.StartColumn,
+                LabelSpan = new SourceSpan(start + labelSpan.Start, start + labelSpan.End),
+                UrlSpan = new SourceSpan(start + urlSpan.Start, start + urlSpan.End),
+                TitleSpan = new SourceSpan(start + titleSpan.Start, start + titleSpan.End),
+                Span = new SourceSpan(start, start + length)
             };
             return true;
         }

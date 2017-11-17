@@ -208,12 +208,30 @@ namespace Markdig.Helpers
                 SliceIndex = 0;
                 CurrentChar = '\0';
                 End = -2; 
+                if (lines.Count > 0)
+                {
+                    StartLine = lines.Lines[0].Line;
+                    StartColumn = lines.Lines[0].Column;
+                    StartPosition = lines.Lines[0].Position;
+                }
+                else
+                {
+                    StartLine = 0;
+                    StartColumn = 0;
+                    StartPosition = 0;
+                }
                 for (int i = 0; i < lines.Count; i++)
                 {
                     End += lines.Lines[i].Slice.Length + 1; // Add chars
                 }
                 NextChar();
             }
+
+            public int StartPosition { get; private set; }
+
+            public int StartLine { get; private set; }
+
+            public int StartColumn { get; private set; }
 
             public int Start { get; private set; }
 
