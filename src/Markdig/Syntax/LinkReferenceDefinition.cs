@@ -1,5 +1,5 @@
 ﻿// Copyright (c) Alexandre Mutel. All rights reserved.
-// This file is licensed under the BSD-Clause 2 license. 
+// This file is licensed under the BSD-Clause 2 license.
 // See the license.txt file in the project root for more information.
 using Markdig.Helpers;
 using Markdig.Parsers;
@@ -87,9 +87,11 @@ namespace Markdig.Syntax
         /// </summary>
         /// <typeparam name="T">Type of the text</typeparam>
         /// <param name="text">The text.</param>
+        /// <param name="offset">Character offset of <paramref name="text"/>, relative to the document.</param>
         /// <param name="block">The block.</param>
         /// <returns><c>true</c> if parsing is successful; <c>false</c> otherwise</returns>
-        public static bool TryParse<T>(ref T text, out LinkReferenceDefinition block) where T : ICharIterator
+        /// <remarks>Does not assign <see cref="MarkdownObject.Line"/> or <see cref="MarkdownObject.Column"/>.</remarks>
+        public static bool TryParse<T>(ref T text, int offset, out LinkReferenceDefinition block) where T : ICharIterator
         {
             block = null;
             string label;
@@ -99,21 +101,30 @@ namespace Markdig.Syntax
             SourceSpan urlSpan;
             SourceSpan titleSpan;
 
-            var startSpan = text.Start;
+            var start = text.Start;
 
             if (!LinkHelper.TryParseLinkReferenceDefinition(ref text, out label, out url, out title, out labelSpan, out urlSpan, out titleSpan))
             {
                 return false;
             }
 
+            var end = titleSpan.Length > 0 ? titleSpan.End : urlSpan.End;
+
             block = new LinkReferenceDefinition(label, url, title)
             {
-                LabelSpan = labelSpan,
-                UrlSpan = urlSpan,
-                TitleSpan = titleSpan,
-                Span = new SourceSpan(startSpan, titleSpan.End > 0 ? titleSpan.End: urlSpan.End)
+                LabelSpan = OffsetSourceSpan(labelSpan, offset),
+                UrlSpan = OffsetSourceSpan(urlSpan, offset),
+                TitleSpan = OffsetSourceSpan(titleSpan, offset),
+                Span = new SourceSpan(start + offset, end + offset)
             };
             return true;
+        }
+
+        private static SourceSpan OffsetSourceSpan(SourceSpan span, int offset)
+        {
+            return span.Length == 0
+                ? span
+                : new SourceSpan(span.Start + offset, span.End + offset);
         }
     }
 }

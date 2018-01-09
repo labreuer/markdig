@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // This file is licensed under the BSD-Clause 2 license. 
 // See the license.txt file in the project root for more information.
 using Markdig.Helpers;
@@ -152,9 +152,16 @@ namespace Markdig.Parsers
             {
                 // If we have found a LinkReferenceDefinition, we can discard the previous paragraph
                 var iterator = lines.ToCharIterator();
+                var firstLine = lines.Count > 0
+                    ? lines.Lines[0]
+                    : default(StringLine);
+                var offset = firstLine.Position + firstLine.Column;
                 LinkReferenceDefinition linkReferenceDefinition;
-                if (LinkReferenceDefinition.TryParse(ref iterator, out linkReferenceDefinition))
+                if (LinkReferenceDefinition.TryParse(ref iterator, offset, out linkReferenceDefinition))
                 {
+                    linkReferenceDefinition.Line = firstLine.Line;
+                    linkReferenceDefinition.Column = firstLine.Column;
+
                     if (!state.Document.ContainsLinkReferenceDefinition(linkReferenceDefinition.Label))
                     {
                         state.Document.SetLinkReferenceDefinition(linkReferenceDefinition.Label, linkReferenceDefinition);
